@@ -4,32 +4,35 @@ services:
     build: ./backend
     ports:
       - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://prueba:prueba@postgres:5432/prueba
-      - REDIS_URL=redis://redis:6379
-      - SECRET_KEY=your-secret-key-change-me
-      - GOOGLE_CLIENT_ID=your-google-client-id
-      - GOOGLE_CLIENT_SECRET=your-google-client-secret
-      - APPLE_CLIENT_ID=your-apple-client-id
-      - APPLE_CLIENT_SECRET=your-apple-client-secret
+    env_file:
+      - backend/.env
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
     volumes:
       - ./backend:/app
     command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
   postgres:
     image: postgres:15
     environment:
-      - POSTGRES_USER=prueba
-      - POSTGRES_PASSWORD=prueba
-      - POSTGRES_DB=prueba
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=X7kPqW9mZ3vN
+      - POSTGRES_DB=dockert
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   redis:
     image: redis:7
+    command: redis-server --requirepass Y2nRtH5jK8mB
     ports:
       - "6379:6379"
 volumes:
